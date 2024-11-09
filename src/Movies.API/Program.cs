@@ -1,9 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Movies.API.Data;
-using Movies.API.Data.Extensions;
-using Microsoft.IdentityModel.Tokens;
+﻿var builder = WebApplication.CreateBuilder(args);
 
-var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<MoviesAPIContext>(options =>
@@ -41,12 +37,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 app.Run();
