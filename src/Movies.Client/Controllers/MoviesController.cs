@@ -20,13 +20,7 @@ public class MoviesController : Controller
     // GET: Movies
     public async Task<IActionResult> Index()
     {
-        await LogTokensAndClaims();
         return View(await _movieService.GetMovies());
-    }
-
-    public async Task LogTokensAndClaims()
-    {
-        var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
     }
 
     public async Task LogoutUser()
