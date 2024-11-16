@@ -17,6 +17,19 @@ public class MoviesController : Controller
         _movieService = movieService ?? throw new ArgumentNullException(nameof(movieService));
     }
 
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> OnlyAdmin()
+    {
+        var userInfo = await _movieService.GetUserInfo();
+
+        return View(userInfo);
+    }
+
+    public async Task<IActionResult> AccessDenied()
+    {
+        return View();
+    }
+
     // GET: Movies
     public async Task<IActionResult> Index()
     {

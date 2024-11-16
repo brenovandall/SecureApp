@@ -1,4 +1,6 @@
-﻿using IdentityModel.Client;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Movies.Client.HttpHandlers;
 
@@ -18,7 +20,10 @@ public static class DependencyInjection
             options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
         })
-        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+        {
+            options.AccessDeniedPath = "/Movies/AccessDenied";
+        })
         .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
         {
             options.Authority = "https://localhost:5005";
@@ -28,13 +33,24 @@ public static class DependencyInjection
             options.ResponseType = "code id_token";
             //options.ResponseType = "code";
 
-            options.Scope.Add("openid");
-            options.Scope.Add("profile");
+            //options.Scope.Add("openid");
+            //options.Scope.Add("profile");
+            options.Scope.Add("address");
+            options.Scope.Add("email");
             options.Scope.Add("movieAPI");
+            options.Scope.Add("roles");
+
+            options.ClaimActions.MapUniqueJsonKey("role", "role");
 
             options.SaveTokens = true;
 
             options.GetClaimsFromUserInfoEndpoint = true;
+
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                NameClaimType = JwtClaimTypes.GivenName,
+                RoleClaimType = JwtClaimTypes.Role
+            };
         });
 
         services.AddTransient<AuthenticationDelegatingHandler>();

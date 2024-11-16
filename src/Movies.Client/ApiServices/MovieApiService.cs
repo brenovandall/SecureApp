@@ -1,4 +1,6 @@
 ﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.Client.Models;
 using Newtonsoft.Json;
 
@@ -7,9 +9,42 @@ namespace Movies.Client.ApiServices;
 public class MovieApiService : IMovieApiService
 {
     private readonly IHttpClientFactory _clientFactory;
-    public MovieApiService(IHttpClientFactory clientFactory)
+    private readonly IHttpContextAccessor _contextAccessor;
+
+    public MovieApiService(IHttpClientFactory clientFactory, IHttpContextAccessor contentAccessor)
     {
         _clientFactory = clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
+        _contextAccessor = contentAccessor ?? throw new ArgumentNullException(nameof(contentAccessor));
+    }
+
+    public async Task<UserInfoViewModel> GetUserInfo()
+    {
+        var idpClient = _clientFactory.CreateClient("IDPClient");
+
+        var metaDataResponse = await idpClient.GetDiscoveryDocumentAsync();
+        if (metaDataResponse.IsError)
+            throw new HttpRequestException("Something went wrong while processing the request.");
+
+        var token = await _contextAccessor.HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
+
+        var userInfo = await idpClient.GetUserInfoAsync(
+            new UserInfoRequest
+            {
+                Address = metaDataResponse.UserInfoEndpoint,
+                Token = token
+            });
+
+        if (userInfo.IsError)
+            throw new HttpRequestException("Something went wrong while processing the request.");
+
+        var userInfoDictionary = new Dictionary<string, string>();
+
+        foreach (var claim in userInfo.Claims)
+        {
+            userInfoDictionary.Add(claim.Type, claim.Value);
+        }
+
+        return new UserInfoViewModel(userInfoDictionary);
     }
 
     public async Task<IEnumerable<Movie>> GetMovies()
