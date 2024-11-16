@@ -53,7 +53,7 @@ public class MovieApiService : IMovieApiService
 
         var request = new HttpRequestMessage(
             HttpMethod.Get,
-            "/api/Movies");
+            "/movies");
 
         var response = await client.SendAsync(request,HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
 

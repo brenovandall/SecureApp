@@ -57,7 +57,7 @@ public static class DependencyInjection
 
         services.AddHttpClient("MovieAPIClient", client =>
         {
-            client.BaseAddress = new Uri("https://localhost:5000");
+            client.BaseAddress = new Uri("https://localhost:5010");
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
         }).AddHttpMessageHandler<AuthenticationDelegatingHandler>();
